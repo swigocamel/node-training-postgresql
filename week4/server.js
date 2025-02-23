@@ -3,7 +3,12 @@ const http = require("http")
 const AppDataSource = require("./db")
 
 const requestListener = async (req, res) => {
-  const headers = {}
+  const headers = {
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Content-Length, X-Requested-With",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "PATCH, POST, GET,OPTIONS,DELETE",
+    "Content-Type": "application/json"
+  }
   let body = ""
   req.on("data", (chunk) => {
     body += chunk

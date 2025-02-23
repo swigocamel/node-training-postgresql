@@ -15,6 +15,24 @@ const requestListener = async (req, res) => {
   })
 
   if (req.url === "/api/credit-package" && req.method === "GET") {
+    try {
+      const data = await AppDataSource.getRepository("CreditPackage").find({
+        select: ['id', 'name', 'credit_amount', 'price']
+      })
+      res.writeHead(200, headers)
+      res.write(JSON.stringify({
+        status: "success",
+        data: data
+      }))
+      res.end()  
+    } catch (error) {
+      res.writeHead(500, headers)
+      res.write(JSON.stringify({
+        status: "error",
+        message: "伺服器錯誤",
+      }))
+      res.end()
+    }
     
   } else if (req.url === "/api/credit-package" && req.method === "POST") {
     

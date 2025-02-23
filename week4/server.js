@@ -136,6 +136,29 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     }
+  } else if (req.url === "/api/coaches/skill" && req.method === "GET") {
+    try {
+      const data = await AppDataSource.getRepository("Skill").find({
+        select: ['id', 'name']
+      })
+      res.writeHead(200, headers)
+      res.write(JSON.stringify({
+        status: "success",
+        data: data
+      }))
+      res.end()  
+    } catch (error) {
+      res.writeHead(500, headers)
+      res.write(JSON.stringify({
+        status: "error",
+        message: "伺服器錯誤",
+      }))
+      res.end()
+    }
+  } else if (req.url === "/api/coaches/skill" && req.method === "POST") {
+    
+  } else if (req.url.startsWith("/api/coaches/skill/") && req.method === "DELETE") {
+  
   } else if (req.method === "OPTIONS") {
     res.writeHead(200, headers)
     res.end()

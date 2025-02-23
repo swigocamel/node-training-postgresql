@@ -156,6 +156,56 @@ const requestListener = async (req, res) => {
       res.end()
     }
   } else if (req.url === "/api/coaches/skill" && req.method === "POST") {
+    req.on('end', async () => {
+      try {
+        const { name } = JSON.parse(body);
+        if (!isValidString(name)) {
+          res.writeHead(400, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "欄位未正確填寫",
+          }))
+          res.end()
+          return;
+        }
+
+        const skillRepo = AppDataSource.getRepository("Skill");
+        const findSkill = await skillRepo.find({
+          where: { 
+            name: name
+          } 
+        })
+
+        if (findSkill.length > 0) {
+          res.writeHead(409, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "資料重複",
+          }))
+          res.end()
+          return;
+        }
+
+        const newSkill = skillRepo.create({
+          name
+        })
+        const result = await skillRepo.save(newSkill);
+
+        res.writeHead(200, headers)
+        res.write(JSON.stringify({
+          status: "success",
+          data: result
+        }))
+        res.end()
+      } catch (error) {
+        res.writeHead(500, headers)
+        res.write(JSON.stringify({
+          status: "error",
+          message: "伺服器錯誤",
+        }))
+        res.end()
+      }
+    })
     
   } else if (req.url.startsWith("/api/coaches/skill/") && req.method === "DELETE") {
   

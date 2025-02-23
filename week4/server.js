@@ -2,6 +2,15 @@ require("dotenv").config()
 const http = require("http")
 const AppDataSource = require("./db")
 
+const isValidString = (value) => {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+// 可增加其他檢查: 例如正整數
+const isNumber = (value) => {
+  return typeof value === 'number' && !isNaN(value);
+}
+
 const requestListener = async (req, res) => {
   const headers = {
     "Access-Control-Allow-Headers": "Content-Type, Authorization, Content-Length, X-Requested-With",
@@ -33,9 +42,61 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     }
-    
+
   } else if (req.url === "/api/credit-package" && req.method === "POST") {
-    
+    req.on('end', async () => {
+      try {
+        const { name, credit_amount, price } = JSON.parse(body);
+        if (!isValidString(name) || !isNumber(credit_amount) || !isNumber(price)) {
+          res.writeHead(400, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "欄位未正確填寫",
+          }))
+          res.end()
+          return;
+        }
+
+        const CreditPackage = AppDataSource.getRepository("CreditPackage");
+        const findCreditPackage = await CreditPackage.find({
+          where: { 
+            name: name
+          } 
+        })
+        if (findCreditPackage.length > 0) {
+          res.writeHead(409, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "資料重複",
+          }))
+          res.end()
+          return;
+        }
+
+        const newCreditPackage = CreditPackage.create({
+          name,
+          credit_amount,
+          price
+        })
+
+        const result = await CreditPackage.save(newCreditPackage);
+
+        res.writeHead(200, headers)
+        res.write(JSON.stringify({
+          status: "success",
+          data: result
+        }))
+        res.end()  
+  
+      } catch (error) {
+        res.writeHead(500, headers)
+        res.write(JSON.stringify({
+          status: "error",
+          message: "伺服器錯誤",
+        }))
+        res.end()
+      }
+    })    
   } else if (req.url.startsWith("/api/credit-package/") && req.method === "DELETE") {
     
   } else if (req.method === "OPTIONS") {

@@ -62,6 +62,33 @@ router.post('/', async (req, res, next) => {
 })
 
 router.delete('/:creditPackageId', async (req, res, next) => {
+    try {
+        const { creditPackageId } = req.params
+  
+        if (!isValidString(creditPackageId)) {
+          res.status(400).json({
+            status: "failed",
+            message: "ID錯誤",
+          })
+          return
+        }
+  
+        const result = await dataSource.getRepository("CreditPackage").delete(creditPackageId);
+        if (result.affected === 0) {
+          res.status(404).json({
+            status: "failed",
+            message: "找不到資料",
+          })
+          return
+        }
+        
+        res.status(200).json({
+          status: "success",
+          message: "刪除成功",
+        })
+      } catch (error) {
+        next(error)
+      }  
 })
 
 module.exports = router

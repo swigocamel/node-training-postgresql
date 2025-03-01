@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('CreditPackage')
-const { isValidString, isNumber } = require('../utils/validator')
+const { isValidString, isNumber } = require('../utils/validUtils')
 
 router.get('/', async (req, res, next) => {
     try {

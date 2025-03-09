@@ -3,7 +3,7 @@ const config = require('../config/index')
 
 const CreditPackage = require('../entities/CreditPackages')
 const Skill = require('../entities/Skill')
-const User = require('../entities/User')
+const User = require('../entities/Users')
 
 const dataSource = new DataSource({
   type: 'postgres',

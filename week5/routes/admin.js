@@ -65,7 +65,78 @@ router.post('/coaches/courses', async (req, res, next) => {
       logger.error(error)
       next(error)
     }
-  })
+})
+
+router.put('/coaches/courses/:courseId', async (req, res, next) => {
+    try {
+      const { courseId } = req.params
+      // TODO 可以做檢查日期格式
+      // 可以用 moment
+      const { skill_id, name, description, start_at, end_at, max_participants, meeting_url } = req.body
+      if( !isValidString(courseId)
+      ||  !isValidString(skill_id) || !isValidString(name)
+      || !isValidString(description) || !isValidString(start_at) || !isValidString(end_at)
+      || !isNumber(max_participants) || !isValidString(meeting_url) || !meeting_url.startsWith('https')) {
+        res.status(400).json({
+          status : "failed",
+          message: "欄位未填寫正確"
+        })
+        return
+      }
+
+      const courseRepo = dataSource.getRepository("Course")
+      const findCourse = await courseRepo.findOne({
+        where: {
+          id: courseId
+        }
+      })
+
+      if(!findCourse) {
+        res.status(400).json({
+            status: "failed",
+            message: "課程不存在"
+        })
+        return
+      }
+
+      const updateCourse = await courseRepo.update({
+        id: courseId
+      }, {
+        skill_id,
+        name,
+        description,
+        start_at,
+        end_at,
+        max_participants,
+        meeting_url
+      })
+
+      if (updateCourse.affected === 0) {
+        res.status(400).json({
+          status: "failed",
+          message: "更新課程失敗"
+        })
+        return
+      }
+
+      const result = await courseRepo.findOne({
+        where: {
+          id: courseId
+        }
+      })
+  
+      res.status(201).json({
+        status: "success",
+        data: {
+          course: result
+        }
+      })
+    } catch (error) {
+      logger.error(error)
+      next(error)
+    }
+})
+
 router.post('/coaches/:userId', async (req, res, next) => {
   try {
     const { userId } = req.params

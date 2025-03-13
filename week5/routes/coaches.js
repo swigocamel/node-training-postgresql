@@ -49,4 +49,72 @@ router.get('/', async (req, res, next) => {
   }
 })
 
+router.get('/:coachId', async (req, res, next) => {
+    try {
+      const { coachId } = req.params
+      if(!isValidString(coachId)) {
+        res.status(400).json({
+          status: 'failed',
+          message: '欄位未填寫正確'
+        })
+        return
+      }
+
+      const coachRepo = dataSource.getRepository('Coach')
+      const userRepo = dataSource.getRepository('User')
+      const findCoach = await coachRepo.findOne({
+        where: {
+          user_id: coachId
+        }
+      })
+
+      if (!findCoach) {
+        res.status(400).json({
+          status: 'failed',
+          message: '找不到該教練'
+        })
+        return
+      }
+
+    //   const coachResult = {
+    //     id: findCoach.id,
+    //     user_id: findCoach.user_id,
+    //     experienced_years: findCoach.experienced_years,
+    //     description: findCoach.description,
+    //     profile_image_url: findCoach.profile_image_url
+    //     created_at: findCoach.created_at,
+    //     updated_at: findCoach.updated_at
+    //   }
+
+      const userResult = await userRepo.findOne({
+        where: {
+          id: coachId
+        }
+      })
+
+      res.status(200).json({
+        status: 'success',
+        data: {
+          user: {
+            name: userResult.name,
+            role: userResult.role
+          },
+          coach: {
+            id: findCoach.id,
+            user_id: findCoach.user,
+            experienced_years: findCoach.experienced_years,
+            description: findCoach.description,
+            profile_image_url: findCoach.profile_image_url,
+            created_at: findCoach.created_at,
+            updated_at: findCoach.updated_at
+          }
+        }
+      })
+
+    } catch (error) {
+      logger.error(error)
+      next(error)
+    }
+  })
+
 module.exports = router

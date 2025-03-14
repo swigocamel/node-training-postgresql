@@ -6,6 +6,7 @@ const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('User')
 
 const { isValidString, isValidPassword } = require('../utils/validUtils')
+const { appError } = require('../utils/appError')
 
 const saltRounds = 10
 

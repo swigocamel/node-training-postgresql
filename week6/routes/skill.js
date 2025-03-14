@@ -23,10 +23,7 @@ router.post('/', async (req, res, next) => {
     try {
         const { name } = req.body
         if (!isValidString(name)) {
-          res.status(400).json({
-            status: "failed",
-            message: "欄位未正確填寫",
-          })
+          next(appError(400, "欄位未正確填寫"))
           return
         }
 
@@ -37,10 +34,7 @@ router.post('/', async (req, res, next) => {
           } 
         })
         if (findSkill.length > 0) {
-          res.status(409).json({
-            status: "failed",
-            message: "資料重複",
-          })
+          next(appError(409, "資料重複"))
           return
         }
 
@@ -64,19 +58,13 @@ router.delete('/:skillId', async (req, res, next) => {
         const { skillId } = req.params
   
         if (!isValidString(skillId)) {
-          res.status(400).json({
-            status: "failed",
-            message: "ID錯誤",
-          })
+          next(appError(400, "ID錯誤"))
           return
         }
   
         const result = await dataSource.getRepository("Skill").delete(skillId);
         if (result.affected === 0) {
-          res.status(404).json({
-            status: "failed",
-            message: "找不到資料",
-          })
+          next(appError(404, "找不到資料"))
           return
         }
         

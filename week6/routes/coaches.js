@@ -10,10 +10,7 @@ router.get('/', async (req, res, next) => {
   try {
     const { per, page } = req.query
     if(!isValidString(per) || !isValidString(page)) {
-        res.status(400).json({
-        status: 'failed',
-        message: '欄位未填寫正確'
-      })
+      next(appError(400, '欄位未填寫正確'))
       return
     }
 
@@ -53,10 +50,7 @@ router.get('/:coachId', async (req, res, next) => {
     try {
       const { coachId } = req.params
       if(!isValidString(coachId)) {
-        res.status(400).json({
-          status: 'failed',
-          message: '欄位未填寫正確'
-        })
+        next(appError(400, '欄位未填寫正確'))
         return
       }
 
@@ -69,22 +63,9 @@ router.get('/:coachId', async (req, res, next) => {
       })
 
       if (!findCoach) {
-        res.status(400).json({
-          status: 'failed',
-          message: '找不到該教練'
-        })
+        next(appError(404, '找不到教練'))
         return
       }
-
-    //   const coachResult = {
-    //     id: findCoach.id,
-    //     user_id: findCoach.user_id,
-    //     experienced_years: findCoach.experienced_years,
-    //     description: findCoach.description,
-    //     profile_image_url: findCoach.profile_image_url
-    //     created_at: findCoach.created_at,
-    //     updated_at: findCoach.updated_at
-    //   }
 
       const userResult = await userRepo.findOne({
         where: {

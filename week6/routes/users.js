@@ -30,18 +30,12 @@ router.post('/signup', async (req, res, next) => {
     const { name, email, password } = req.body
 
     if (!isValidString(name) || !isValidString(email) || !isValidString(password)) {
-      res.status(400).json({
-        status: "failed",
-        message: "欄位未正確填寫",
-      })
+      next(appError(400, "欄位未正確填寫"))
       return
     }
 
     if (!isValidPassword(password)) {
-      res.status(400).json({
-        status: "failed",
-        message: "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字",
-      })
+      next(appError(400, "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字"))
       return
     }
 
@@ -53,10 +47,7 @@ router.post('/signup', async (req, res, next) => {
     })
 
     if (findUser) {
-      res.status(409).json({
-        status : "failed",
-        message: "Email已被使用"
-      })
+      next(appError(409, "Email已被使用"))
       return
     }
 

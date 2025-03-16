@@ -9,6 +9,7 @@ const skillRouter = require('./routes/skill')
 const userRouter = require('./routes/users')
 const adminRouter = require('./routes/admin')
 const coachRouter = require('./routes/coaches')
+const courseRouter = require('./routes/courses')
 
 const app = express()
 app.use(cors())
@@ -34,6 +35,7 @@ app.use('/api/coaches/skill', skillRouter)
 app.use('/api/users', userRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/coaches', coachRouter)
+app.use('/api/courses', courseRouter)
 
 app.use((req, res, next) => {
   res.status(404).json({

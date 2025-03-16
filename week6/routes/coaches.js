@@ -6,13 +6,12 @@ const logger = require('../utils/logger')('Coach')
 
 const { isValidString, isNumber } = require('../utils/validUtils')
 const appError = require('../utils/appError')
+const handleErrorAsync = require('../utils/handleErrorAsync')
 
-router.get('/', async (req, res, next) => {
-  try {
+router.get('/', handleErrorAsync ( async (req, res, next) => {
     const { per, page } = req.query
     if(!isValidString(per) || !isValidString(page)) {
-      next(appError(400, '欄位未填寫正確'))
-      return
+      return next(appError(400, '欄位未填寫正確'))
     }
 
     // per & page 轉成數字
@@ -41,18 +40,12 @@ router.get('/', async (req, res, next) => {
         status: "success",
         data: coachResult
     })
-  } catch (error) {
-    logger.error(error)
-    next(error)
-  }
-})
+}))
 
-router.get('/:coachId', async (req, res, next) => {
-    try {
+router.get('/:coachId', handleErrorAsync ( async (req, res, next) => {
       const { coachId } = req.params
       if(!isValidString(coachId)) {
-        next(appError(400, '欄位未填寫正確'))
-        return
+        return next(appError(400, '欄位未填寫正確'))
       }
 
       const coachRepo = dataSource.getRepository('Coach')
@@ -64,8 +57,7 @@ router.get('/:coachId', async (req, res, next) => {
       })
 
       if (!findCoach) {
-        next(appError(404, '找不到教練'))
-        return
+        return next(appError(404, '找不到教練'))
       }
 
       const userResult = await userRepo.findOne({
@@ -92,11 +84,6 @@ router.get('/:coachId', async (req, res, next) => {
           }
         }
       })
-
-    } catch (error) {
-      logger.error(error)
-      next(error)
-    }
-  })
+  }))
 
 module.exports = router

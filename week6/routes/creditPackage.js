@@ -5,9 +5,9 @@ const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('CreditPackage')
 const { isValidString, isNumber } = require('../utils/validUtils')
 const appError = require('../utils/appError')
+const handleErrorAsync = require('../utils/handleErrorAsync')
 
-router.get('/', async (req, res, next) => {
-    try {
+router.get('/', handleErrorAsync ( async (req, res, next) => {
         const data = await dataSource.getRepository("CreditPackage").find({
           select: ['id', 'name', 'credit_amount', 'price']
         })
@@ -15,17 +15,12 @@ router.get('/', async (req, res, next) => {
           status: "success",
           data: data,
         })
-      } catch (error) {
-        next(error)
-    }  
-})
+}))
 
-router.post('/', async (req, res, next) => {
-    try {
+router.post('/', handleErrorAsync ( async (req, res, next) => {
         const { name, credit_amount, price } = req.body
         if (!isValidString(name) || !isNumber(credit_amount) || !isNumber(price)) {
-          next(appError(400, "欄位未正確填寫"))
-          return
+          return next(appError(400, "欄位未正確填寫"))
         }
 
         const CreditPackage = dataSource.getRepository("CreditPackage");
@@ -35,8 +30,7 @@ router.post('/', async (req, res, next) => {
           } 
         })
         if (findCreditPackage.length > 0) {
-          next(appError(409, "資料重複"))
-          return
+          return next(appError(409, "資料重複"))
         }
 
         const newCreditPackage = CreditPackage.create({
@@ -51,33 +45,24 @@ router.post('/', async (req, res, next) => {
           status: "success",
           data: result,
         })
-      } catch (error) {
-        next(error)
-    }
-})
+}))
 
-router.delete('/:creditPackageId', async (req, res, next) => {
-    try {
+router.delete('/:creditPackageId', handleErrorAsync ( async (req, res, next) => {
         const { creditPackageId } = req.params
   
         if (!isValidString(creditPackageId)) {
-          next(appError(400, "ID錯誤"))
-          return
+          return next(appError(400, "ID錯誤"))
         }
   
         const result = await dataSource.getRepository("CreditPackage").delete(creditPackageId);
         if (result.affected === 0) {
-          next(appError(404, "找不到資料"))
-          return
+          return next(appError(404, "找不到資料"))
         }
         
         res.status(200).json({
           status: "success",
           message: "刪除成功",
         })
-      } catch (error) {
-        next(error)
-      }  
-})
+}))
 
 module.exports = router

@@ -9,11 +9,11 @@ const { isValidString, isValidPassword } = require('../utils/validUtils')
 const appError = require('../utils/appError')
 const { generateJWT } = require('../utils/jwtUtils')
 const isAuth = require('../middlewares/isAuth')
+const handleErrorAsync = require('../utils/handleErrorAsync')
 
 const saltRounds = 10
 
-router.get('/signup', async (req, res, next) => {
-  try {
+router.get('/signup', handleErrorAsync ( async (req, res, next) => {
     const data = await dataSource.getRepository("User").find({
       select: ['id', 'name', 'email', 'role']
     })
@@ -22,24 +22,17 @@ router.get('/signup', async (req, res, next) => {
       status: "success",
       data: data,
     })
-  } catch (error) {
-    logger.error(error)
-    next(error)
-  }
-})
+}))
 
-router.post('/signup', async (req, res, next) => {
-   try {
+router.post('/signup', handleErrorAsync ( async (req, res, next) => {
     const { name, email, password } = req.body
 
     if (!isValidString(name) || !isValidString(email) || !isValidString(password)) {
-      next(appError(400, "欄位未正確填寫"))
-      return
+      return next(appError(400, "欄位未正確填寫"))
     }
 
     if (!isValidPassword(password)) {
-      next(appError(400, "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字"))
-      return
+      return next(appError(400, "密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字"))
     }
 
     const userRepo = dataSource.getRepository("User");
@@ -50,8 +43,7 @@ router.post('/signup', async (req, res, next) => {
     })
 
     if (findUser) {
-      next(appError(409, "Email已被使用"))
-      return
+      return next(appError(409, "Email已被使用"))
     }
 
     const hashPassword = await bcrypt.hash(password, saltRounds)
@@ -72,22 +64,15 @@ router.post('/signup', async (req, res, next) => {
         }
       }
     })
-   } catch (error) {
-    logger.error(error)
-    next(error)
-   }
-})
+}))
 
-router.post('/login', async (req, res, next) => {
-  try {
+router.post('/login', handleErrorAsync ( async (req, res, next) => {
     const { email, password } = req.body
     if (!isValidString(email) ||! isValidString(password)) {
-      next(appError(400, '欄位未填寫正確'))
-      return
+      return next(appError(400, '欄位未填寫正確'))
     }
     if(!isValidPassword(password)) {
-      next(appError(400, '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字'))
-      return
+      return next(appError(400, '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字'))
     }
 
     
@@ -100,14 +85,12 @@ router.post('/login', async (req, res, next) => {
       }
     })
     if (!findUser) {
-      next(appError(400, '使用者不存在或密碼錯誤'))
-      return
+      return next(appError(400, '使用者不存在或密碼錯誤'))
     }
 
     const isMatch = await bcrypt.compare(password, findUser.password)
     if (!isMatch) {
-      next(appError(400, '使用者不存在或密碼錯誤'))
-      return
+      return next(appError(400, '使用者不存在或密碼錯誤'))
     }
   
     // TODO JWT
@@ -125,19 +108,13 @@ router.post('/login', async (req, res, next) => {
         }
       }
     })
-  } catch (error) {
-    logger.error('登入錯誤:', error)
-    next(error)
-  }
-})
+}))
 
-router.get('/profile', isAuth, async (req, res, next) => {
-  try {
+router.get('/profile', isAuth, handleErrorAsync ( async (req, res, next) => {
     const { id } = req.user
 
     if (!isValidString(id)) {
-      next(appError(400, '欄位未填寫正確'))
-      return
+      return next(appError(400, '欄位未填寫正確'))
     }
 
     const findUser = await dataSource.getRepository('User').findOne({
@@ -153,19 +130,13 @@ router.get('/profile', isAuth, async (req, res, next) => {
         name: findUser.name
       }
     })
-  } catch (error) {
-    logger.error('取得使用者資料錯誤:', error)
-    next(error)
-  }
-})
+}))
 
-router.put('/profile', isAuth, async (req, res, next) => {
-  try {
+router.put('/profile', isAuth, handleErrorAsync ( async (req, res, next) => {
     const { id } = req.user
     const { name } = req.body
     if (!isValidString(name)) {
-      next(appError('400', '欄位未填寫正確'))
-      return
+      return next(appError('400', '欄位未填寫正確'))
     }
     const userRepo = dataSource.getRepository('User')
 
@@ -177,8 +148,7 @@ router.put('/profile', isAuth, async (req, res, next) => {
     })
 
     if (findUser.name === name) {
-      next(appError(400, '使用者名稱未變更'))
-      return
+      return next(appError(400, '使用者名稱未變更'))
     }
     
     const updateUser = await userRepo.update({
@@ -188,17 +158,11 @@ router.put('/profile', isAuth, async (req, res, next) => {
     })
 
     if (updateUser.affected === 0) {
-      next(appError(400, '更新使用者失敗'))
-      return
+      return next(appError(400, '更新使用者失敗'))
     }
     
     res.status(200).json({
       status: 'success',
     })
-    
-  } catch (error) {
-    logger.error('取得使用者資料錯誤:', error)
-    next(error)
-  }
-})
+}))
 module.exports = router

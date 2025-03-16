@@ -6,7 +6,7 @@ const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('User')
 
 const { isValidString, isValidPassword } = require('../utils/validUtils')
-const { appError } = require('../utils/appError')
+const appError = require('../utils/appError')
 const { generateJWT } = require('../utils/jwtUtils')
 
 const saltRounds = 10

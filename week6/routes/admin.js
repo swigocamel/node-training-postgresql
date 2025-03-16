@@ -5,7 +5,7 @@ const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Admin')
 
 const { isValidString, isNumber } = require('../utils/validUtils')
-const { appError } = require('../utils/appError')
+const appError = require('../utils/appError')
 
 router.post('/coaches/courses', async (req, res, next) => {
     try {

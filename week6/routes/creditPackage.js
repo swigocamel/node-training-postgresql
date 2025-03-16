@@ -4,7 +4,7 @@ const router = express.Router()
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('CreditPackage')
 const { isValidString, isNumber } = require('../utils/validUtils')
-const { appError } = require('../utils/appError')
+const appError = require('../utils/appError')
 
 router.get('/', async (req, res, next) => {
     try {

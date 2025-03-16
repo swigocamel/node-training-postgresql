@@ -76,4 +76,54 @@ router.post('/signup', async (req, res, next) => {
    }
 })
 
+router.post('/login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body
+    if (!isValidString(email) ||! isValidString(password)) {
+      next(appError(400, '欄位未填寫正確'))
+      return
+    }
+    if(!isValidPassword(password)) {
+      next(appError(400, '密碼不符合規則，需要包含英文數字大小寫，最短8個字，最長16個字'))
+      return
+    }
+
+    
+    const userRepo = dataSource.getRepository('User')
+    // 使用者不存在或密碼輸入錯誤
+    const findUser = await userRepo.findOne({
+      select:['id', 'name', 'password'],
+      where: {
+        email: email
+      }
+    })
+    if (!findUser) {
+      next(appError(400, '使用者不存在或密碼錯誤'))
+      return
+    }
+
+    const isMatch = await bcrypt.compare(password, findUser.password)
+    if (!isMatch) {
+      next(appError(400, '使用者不存在或密碼錯誤'))
+      return
+    }
+  
+    // TODO JWT
+
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        // token,
+        // user: {
+        //   name: findUser.name
+        // }
+      }
+    })
+  } catch (error) {
+    logger.error('登入錯誤:', error)
+    next(error)
+  }
+})
+
 module.exports = router

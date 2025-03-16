@@ -4,4 +4,4 @@ const appError = (status, errMessage, next) => {
     return error;
   }
   
-  module.exports = { appError };
+  module.exports = appError;

@@ -6,8 +6,9 @@ const logger = require('../utils/logger')('Admin')
 
 const { isValidString, isNumber } = require('../utils/validUtils')
 const appError = require('../utils/appError')
+const isAuth = require('../middlewares/isAuth')
 
-router.post('/coaches/courses', async (req, res, next) => {
+router.post('/coaches/courses', isAuth, async (req, res, next) => {
     try {
       // TODO 可以做檢查日期格式
       // 可以用 moment
@@ -59,7 +60,7 @@ router.post('/coaches/courses', async (req, res, next) => {
     }
 })
 
-router.put('/coaches/courses/:courseId', async (req, res, next) => {
+router.put('/coaches/courses/:courseId', isAuth, async (req, res, next) => {
     try {
       const { courseId } = req.params
       // TODO 可以做檢查日期格式

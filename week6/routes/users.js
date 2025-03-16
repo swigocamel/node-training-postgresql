@@ -7,6 +7,7 @@ const logger = require('../utils/logger')('User')
 
 const { isValidString, isValidPassword } = require('../utils/validUtils')
 const { appError } = require('../utils/appError')
+const { generateJWT } = require('../utils/jwtUtils')
 
 const saltRounds = 10
 
@@ -109,15 +110,18 @@ router.post('/login', async (req, res, next) => {
     }
   
     // TODO JWT
-
+    const token = generateJWT({
+      id: findUser.id,
+      role: findUser.role
+    })
 
     res.status(201).json({
       status: 'success',
       data: {
-        // token,
-        // user: {
-        //   name: findUser.name
-        // }
+        token,
+        user: {
+          name: findUser.name
+        }
       }
     })
   } catch (error) {

@@ -6,6 +6,7 @@ const logger = require('../utils/logger')('CreditPackage')
 const { isValidString, isNumber } = require('../utils/validUtils')
 const appError = require('../utils/appError')
 const handleErrorAsync = require('../utils/handleErrorAsync')
+const isAuth = require('../middlewares/isAuth')
 
 router.get('/', handleErrorAsync ( async (req, res, next) => {
         const data = await dataSource.getRepository("CreditPackage").find({
@@ -46,6 +47,25 @@ router.post('/', handleErrorAsync ( async (req, res, next) => {
           data: result,
         })
 }))
+
+router.post('/:creditPackageId', isAuth, handleErrorAsync ( async (req, res, next) => {
+        const { creditPackageId } = req.params
+
+        const findCreditPackage = await dataSource.getRepository('CreditPackage').findOne({
+          where: { 
+            id: creditPackageId
+          } 
+        })
+        if (!findCreditPackage) {
+          return next(appError(400, "ID錯誤"))
+        }
+
+        res.status(200).json({
+          status: "success",
+          data: [],
+        })
+}
+))
 
 router.delete('/:creditPackageId', handleErrorAsync ( async (req, res, next) => {
         const { creditPackageId } = req.params

@@ -8,6 +8,7 @@ const logger = require('../utils/logger')('User')
 const { isValidString, isValidPassword } = require('../utils/validUtils')
 const appError = require('../utils/appError')
 const { generateJWT } = require('../utils/jwtUtils')
+const isAuth = require('../middlewares/isAuth')
 
 const saltRounds = 10
 
@@ -130,4 +131,31 @@ router.post('/login', async (req, res, next) => {
   }
 })
 
+router.get('/profile', isAuth, async (req, res, next) => {
+  try {
+    const { id } = req.user
+
+    if (!isValidString(id)) {
+      next(appError(400, '欄位未填寫正確'))
+      return
+    }
+
+    const findUser = await dataSource.getRepository('User').findOne({
+      where: {
+        id: id
+      }
+    })
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        email: findUser.email,
+        name: findUser.name
+      }
+    })
+  } catch (error) {
+    logger.error('取得使用者資料錯誤:', error)
+    next(error)
+  }
+})
 module.exports = router
